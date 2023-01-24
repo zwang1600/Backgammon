@@ -1,6 +1,6 @@
 '''
-Name(s):
-UW netid(s):
+Name(s): Zuo Wang
+UW netid(s): zwang36
 '''
 
 from game_engine import genmoves
@@ -14,12 +14,14 @@ class BackgammonPlayer:
     # For students in partnership: UWNETID + " " + UWNETID
     def nickname(self):
         # TODO: return a string representation of your UW netid(s)
-        return ""
+        return "1938164 1972609"
 
     # If prune==True, then your Move method should use Alpha-Beta Pruning
     # otherwise Minimax
     def useAlphaBetaPruning(self, prune=False):
         # TODO: use the prune flag to indiciate what search alg to use
+        # if prune:
+        # else:
         pass
 
     # Returns a tuple containing the number explored
@@ -47,10 +49,21 @@ class BackgammonPlayer:
     def move(self, state, die1=1, die2=6):
         # TODO: return a move for the current state and for the current player.
         # Hint: you can get the current player with state.whose_move
+        self.staticEval(state=state)
         return "q"
 
 
     # Hint: Look at game_engine/boardState.py for a board state properties you can use.
     def staticEval(self, state):
-        # TODO: return a number for the given state
-        return -1
+        # Return a number for the given state
+        # The static evaluation is as followed:
+        #   The white checkers off the board count as 24
+        #   The red chekcers off the board count as -24
+        #   The white checkers on the board count as it's distance from point 24
+        #   The red checkers on the board count as (it's distance from point 24) * -1
+        eval = 24 * (len(state.white_off) - len(state.red_off))
+        for index, point in enumerate(state.pointLists):
+            for checker in point:
+                if checker == 0: eval += index  # This is a white checker
+                else: eval -= (23 - index)      # This is a red checker
+        return eval
