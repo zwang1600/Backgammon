@@ -24,6 +24,8 @@ class BackgammonPlayer:
     def useAlphaBetaPruning(self, prune=False):
         # TODO: use the prune flag to indiciate what search alg to use
         self.prune = prune
+        self.states = 0
+        self.cutoffs = 0
 
 
     # Returns a tuple containing the number explored
@@ -68,6 +70,9 @@ class BackgammonPlayer:
 
 
     def alphaBetaPruning(self, state, depth, alpha, beta):
+        # increment states
+        self.states += 1
+
         # check if at leaf node or game is over
         if depth == 0 or len(state.white_off) == 15 or len(state.red_off) == 15:
             return self.func(state=state)
@@ -79,7 +84,8 @@ class BackgammonPlayer:
                 eval = self.alphaBetaPruning(move[1], depth - 1, alpha, beta)
                 maxEval = max(maxEval, eval)
                 alpha = max(alpha, eval)
-                if beta <= alpha:
+                if beta <= alpha: # prune
+                    self.cutoffs += 1 # increment cutoffs
                     break
             return maxEval
 
@@ -90,12 +96,16 @@ class BackgammonPlayer:
                 eval = self.alphaBetaPruning(move[1], depth - 1, alpha, beta)
                 minEval = min(minEval, eval)
                 beta = min(beta, eval)
-                if beta <= alpha:
+                if beta <= alpha: # prune
+                    self.cutoffs += 1 # increment cutoffs
                     break
             return minEval
 
 
     def miniMax(self, state, depth):
+        # increment states
+        self.states += 1
+
         # check if at leaf node or game is over
         if depth == 0 or len(state.white_off) == 15 or len(state.red_off) == 15:
             return self.func(state=state)
