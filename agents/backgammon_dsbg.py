@@ -12,6 +12,7 @@ class BackgammonPlayer:
         self.maxply = 2
         self.states = 0
         self.cutoffs = 0
+        self.prune = False
 
     # Return a string containing your UW NETID(s)
     # For students in partnership: UWNETID + " " + UWNETID
@@ -22,10 +23,8 @@ class BackgammonPlayer:
     # otherwise Minimax
     def useAlphaBetaPruning(self, prune=False):
         # TODO: use the prune flag to indiciate what search alg to use
-        # if prune:
-        # else:
+        self.prune = prune
 
-        pass
 
     # Returns a tuple containing the number explored
     # states as well as the number of cutoffs.
@@ -42,7 +41,7 @@ class BackgammonPlayer:
     # If not None, it update the internal static evaluation
     # function to be func
     def useSpecialStaticEval(self, func):
-        if func != None: self.func = func        
+        if func != None: self.func = func
 
     # Given a state and a roll of dice, it returns the best move for
     # the state.whose_move.
@@ -52,11 +51,14 @@ class BackgammonPlayer:
         # Hint: you can get the current player with state.whose_move
         bestMove = None
         bestScore = -1e9 + state.whose_move * 1e9 * 2    # -1e9 for white 1e9 for red
-        for move in self.GenMoveInstance.gen_moves(state=state, 
-                                                    whose_move=state.whose_move, 
-                                                    die1=die1, 
+        for move in self.GenMoveInstance.gen_moves(state=state,
+                                                    whose_move=state.whose_move,
+                                                    die1=die1,
                                                     die2=die2):
-            score = self.miniMax(state=move[1], depth=self.maxply)
+            if self.prune:
+                score = self.alphaBetaPruning(state=move[1], depth=self.maxply, alpha=-1e9, beta=1e9)
+            else:
+                score = self.miniMax(state=move[1], depth=self.maxply)
             if (state.whose_move == 0 and score > bestScore) or \
                 (state.whose_move == 1 and score < bestScore):
                 bestScore = score
@@ -64,17 +66,56 @@ class BackgammonPlayer:
         print(bestMove[0])
         return bestMove[0]
 
+
+    def alphaBetaPruning(self, state, depth, alpha, beta):
+        # check if at leaf node or game is over
+        if depth == 0 or len(state.white_off) == 15 or len(state.red_off) == 15:
+            return self.func(state=state)
+
+        # white's move (maximizing player)
+        if state.whose_move == 0:
+            maxEval = -1e9
+            for move in self.GenMoveInstance.gen_moves(state=state, whose_move=state.whose_move, die1=1, die2=6):
+                eval = self.alphaBetaPruning(move[1], depth - 1, alpha, beta)
+                maxEval = max(maxEval, eval)
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
+            return maxEval
+
+        # red's move (minimizing player)
+        if state.whose_move ==1:
+            minEval = 1e9
+            for move in self.GenMoveInstance.gen_moves(state=state, whose_move=state.whose_move, die1=1, die2=6):
+                eval = self.alphaBetaPruning(move[1], depth - 1, alpha, beta)
+                minEval = min(minEval, eval)
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+            return minEval
+
+
     def miniMax(self, state, depth):
-        if depth == 0: return self.func(state=state)
-        provisional = 1e9                               # 1e9 for red
-        if state.whose_move == 0: provisional = -1e9    # -1e9 forwhite
-        for move in self.GenMoveInstance.gen_moves(state=state, whose_move=state.whose_move, die1=1, die2=6):
-            newVal = self.miniMax(move[1], depth - 1)
-            if (state.whose_move == 0 and newVal > provisional) or \
-                (state.whose_move == 1 and newVal < provisional):
-                provisional = newVal
-        return provisional
-            
+        # check if at leaf node or game is over
+        if depth == 0 or len(state.white_off) == 15 or len(state.red_off) == 15:
+            return self.func(state=state)
+
+        # white's move (maximizing player)
+        if state.whose_move == 0:
+            maxEval = -1e9
+            for move in self.GenMoveInstance.gen_moves(state=state, whose_move=state.whose_move, die1=1, die2=6):
+                eval = self.miniMax(move[1], depth - 1)
+                maxEval = max(maxEval, eval)
+            return maxEval
+
+        # red's move (minimizing player)
+        if state.whose_move ==1:
+            minEval = 1e9
+            for move in self.GenMoveInstance.gen_moves(state=state, whose_move=state.whose_move, die1=1, die2=6):
+                eval = self.miniMax(move[1], depth - 1)
+                minEval = min(minEval, eval)
+            return minEval
+
 
     # Hint: Look at game_engine/boardState.py for a board state properties you can use.
     def staticEval(self, state):
