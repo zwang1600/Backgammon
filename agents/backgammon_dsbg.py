@@ -89,7 +89,7 @@ class BackgammonPlayer:
             return maxEval
 
         # red's move (minimizing player)
-        if state.whose_move ==1:
+        if state.whose_move == 1:
             minEval = 1e9
             for move in self.GenMoveInstance.gen_moves(state=state, whose_move=state.whose_move, die1=1, die2=6):
                 eval = self.alphaBetaPruning(move[1], depth - 1, alpha, beta)
@@ -118,7 +118,7 @@ class BackgammonPlayer:
             return maxEval
 
         # red's move (minimizing player)
-        if state.whose_move ==1:
+        if state.whose_move == 1:
             minEval = 1e9
             for move in self.GenMoveInstance.gen_moves(state=state, whose_move=state.whose_move, die1=1, die2=6):
                 eval = self.miniMax(move[1], depth - 1)
@@ -130,12 +130,14 @@ class BackgammonPlayer:
     def staticEval(self, state):
         # Return a number for the given state
         # The static evaluation is as followed:
-        #   Each white checker off the board counts as 100
-        #   Each red chekcer off the board counts as -100
-        #   Ecah white checker on the bar counts as -5
-        #   Each red chekcer on the bar counts as 5
-        #   Each white checker on the board counts as it's distance from point 24
-        #   Each red checker on the board counts as (it's distance from point 24) * -1
+        #   Each white checker off the board counts as 100 points
+        #   Each red chekcer off the board counts as -100 points
+        #   Ecah white checker on the bar counts as -5 points
+        #   Each red chekcer on the bar counts as 5 points
+        #   Each white checker on the board counts as (its’ point number) points
+        #       For instance, if a white checker is on point 6, it is worth 6 points
+        #   Each red checker on the board counts as (it's distance from point 24) * -1 points
+        #       For instance, if a red checker is on point 8, it is worth (24 - 8) * -1 = -16 points
         eval = 100 * (len(state.white_off) - len(state.red_off))
         for checker in state.bar:
             if checker == 0: eval -= 5
