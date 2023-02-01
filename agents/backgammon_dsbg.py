@@ -22,7 +22,7 @@ class BackgammonPlayer:
     # If prune==True, then your Move method should use Alpha-Beta Pruning
     # otherwise Minimax
     def useAlphaBetaPruning(self, prune=False):
-        # TODO: use the prune flag to indiciate what search alg to use
+        # Use the prune flag to indiciate what search alg to use
         self.prune = prune
         self.states = 0
         self.cutoffs = 0
@@ -49,7 +49,7 @@ class BackgammonPlayer:
     # the state.whose_move.
     # Keep in mind: a player can only pass if the player cannot move any checker with that role
     def move(self, state, die1=1, die2=6):
-        # TODO: return a move for the current state and for the current player.
+        # Return a move for the current state and for the current player.
         # Hint: you can get the current player with state.whose_move
         bestMove = None
         bestScore = -1e9 + state.whose_move * 1e9 * 2    # -1e9 for white 1e9 for red
@@ -65,7 +65,6 @@ class BackgammonPlayer:
                 (state.whose_move == 1 and score < bestScore):
                 bestScore = score
                 bestMove = move
-        print(bestMove[0])
         return bestMove[0]
 
 
